@@ -1,0 +1,10 @@
+# Pinned toolchain for the CAD container. These are the versions the repo's
+# tests were run against.
+#
+# build123d pulls in cadquery-ocp-novtk (OpenCASCADE), numpy, scipy, ezdxf,
+# ocpsvg and friends, which is most of the image size.
+build123d==0.13.0
+
+# Used by cadkit: PNG previews and spec files.
+matplotlib==3.11.2
+PyYAML==6.0.3

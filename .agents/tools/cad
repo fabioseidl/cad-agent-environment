@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# cad - entry point for every CAD operation in this repo.
+#
+# By default the command runs inside the CAD container (docker/Dockerfile),
+# which is the only supported way to get a known-good build123d/OpenCASCADE.
+# The repo is bind-mounted at /work, so outputs land in projects/<name>/output
+# on the host.
+#
+#   .agents/tools/cad doctor
+#   .agents/tools/cad new wall-bracket
+#   .agents/tools/cad build wall-bracket
+#
+# Environment variables:
+#   CAD_LOCAL=1      run against the host Python instead of Docker
+#                    (requires build123d, matplotlib and PyYAML installed)
+#   CAD_IMAGE=name   override the image tag (default cad-agent-env:latest)
+#   CAD_BUILD=1      force an image rebuild before running
+#   CAD_DOCKER_ARGS  extra arguments passed to `docker run`
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+IMAGE="${CAD_IMAGE:-cad-agent-env:latest}"
+
+run_local() {
+    PYTHONPATH="${REPO_ROOT}/.agents/tools${PYTHONPATH:+:$PYTHONPATH}" \
+    CAD_REPO_ROOT="${REPO_ROOT}" \
+    MPLBACKEND=Agg \
+        exec "${CAD_PYTHON:-python3}" -m cadkit.cli "$@"
+}
+
+if [[ "${CAD_LOCAL:-0}" == "1" ]]; then
+    run_local "$@"
+fi
+
+if ! command -v docker >/dev/null 2>&1; then
+    echo "cad: docker is not installed." >&2
+    echo "cad: install Docker, or set CAD_LOCAL=1 to use a host Python that has build123d." >&2
+    exit 127
+fi
+
+if ! docker info >/dev/null 2>&1; then
+    echo "cad: the Docker daemon is not reachable." >&2
+    echo "cad: start Docker, or set CAD_LOCAL=1 to use a host Python that has build123d." >&2
+    exit 127
+fi
+
+if [[ "${CAD_BUILD:-0}" == "1" ]] || ! docker image inspect "${IMAGE}" >/dev/null 2>&1; then
+    echo "cad: building image ${IMAGE} (first run only, this takes a few minutes)..." >&2
+    docker build -t "${IMAGE}" "${REPO_ROOT}/docker" >&2
+fi
+
+# shellcheck disable=SC2086
+exec docker run --rm \
+    --user "$(id -u):$(id -g)" \
+    --network none \
+    --volume "${REPO_ROOT}:/work" \
+    --workdir /work \
+    --env PYTHONPATH=/work/.agents/tools \
+    --env CAD_REPO_ROOT=/work \
+    --env MPLBACKEND=Agg \
+    --env MPLCONFIGDIR=/tmp/mpl \
+    --env XDG_CACHE_HOME=/tmp/cache \
+    ${CAD_DOCKER_ARGS:-} \
+    "${IMAGE}" "$@"

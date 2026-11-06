@@ -1,0 +1,12 @@
+# Generated CAD output
+projects/*/output/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Editors / OS
+.DS_Store
+*.swp

@@ -1,0 +1,29 @@
+name: cad
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build the CAD image
+        run: docker build -t cad-agent-env:latest docker
+
+      - name: Toolchain check
+        run: .agents/tools/cad doctor
+
+      - name: Smoke tests
+        run: .agents/tools/cad run tests/test_cadkit.py
+
+      - name: Build the example project
+        run: .agents/tools/cad build example-wall-bracket
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: example-wall-bracket
+          path: projects/example-wall-bracket/output/

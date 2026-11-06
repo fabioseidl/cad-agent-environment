@@ -1,0 +1,20 @@
+# Usage is normally indirect: `.agents/tools/cad <subcommand>` drives this.
+services:
+  cad:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: cad-agent-env:latest
+    # The whole repo is mounted so model scripts, specs and outputs all live
+    # on the host and survive the container.
+    volumes:
+      - ../:/work
+    working_dir: /work
+    # Run as the invoking user so generated files are not root-owned.
+    user: "${CAD_UID:-1000}:${CAD_GID:-1000}"
+    network_mode: "none"
+    environment:
+      PYTHONPATH: /work/.agents/tools
+      MPLBACKEND: Agg
+      MPLCONFIGDIR: /tmp/mpl
+      XDG_CACHE_HOME: /tmp/cache

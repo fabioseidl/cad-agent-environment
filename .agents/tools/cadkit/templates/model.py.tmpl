@@ -1,0 +1,36 @@
+"""__TITLE__ - build123d model.
+
+Contract (see .agents/skills/build123d-modeling):
+  build() must return a build123d Shape, or a dict {name: Shape} for an
+  assembly. Keep every dimension in the PARAMS block so it can be changed
+  without touching the geometry code.
+
+Build with:  .agents/tools/cad build __NAME__
+"""
+
+from build123d import *  # noqa: F403  - the documented build123d usage
+
+# --- parameters (millimetres, degrees) --------------------------------------
+LENGTH = 60.0
+WIDTH = 40.0
+HEIGHT = 20.0
+WALL = 3.0
+FILLET = 2.0
+
+
+def build():
+    with BuildPart() as part:
+        Box(LENGTH, WIDTH, HEIGHT)
+        # Hollow it out, leaving the top face open.
+        offset(amount=-WALL, openings=part.faces().sort_by(Axis.Z)[-1])
+        if FILLET > 0:
+            fillet(part.edges().filter_by(Axis.Z), radius=FILLET)
+
+    result = part.part
+    result.label = "__NAME__"
+    return result
+
+
+if __name__ == "__main__":
+    shape = build()
+    print(shape.bounding_box(), shape.volume)

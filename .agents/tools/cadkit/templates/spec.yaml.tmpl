@@ -1,0 +1,28 @@
+# __TITLE__ - machine-checkable part of the project brief.
+# `cad check __NAME__` verifies the built model against this file.
+name: __NAME__
+units: mm
+
+# Density source for mass estimates. Either a known material name
+# (pla, petg, abs, aluminium, steel, ...) or an explicit density.
+material:
+  name: pla
+  # density_g_cm3: 1.24
+
+# Export formats written by `cad build`.
+exports: [step, stl, 3mf]
+
+# Free-text requirements, for humans and for the agent's own review.
+requirements:
+  - R1: replace with the first requirement the user stated
+
+# Acceptance checks. Scalars are "equal within tolerance_mm";
+# [low, high] is a range. Delete what does not apply.
+checks:
+  tolerance_mm: 0.1
+  bbox_mm:
+    x: 60
+    y: 40
+    z: 20
+  watertight: true
+  solids: 1

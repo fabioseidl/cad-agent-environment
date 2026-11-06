@@ -1,0 +1,27 @@
+# Example Wall Bracket - machine-checkable part of the project brief.
+# `.agents/tools/cad check example-wall-bracket` verifies the model against this.
+name: example-wall-bracket
+units: mm
+
+material:
+  name: pla
+
+exports: [step, stl, 3mf]
+
+requirements:
+  - R1: mounts flat against a wall, four M5 screws in a 36 mm wide pattern
+  - R2: shelf surface 70 mm deep and 60 mm wide
+  - R3: screw heads must sit flush or below the front face of the wall plate
+  - R4: single watertight solid, printable without supports when laid on its back
+
+checks:
+  tolerance_mm: 0.1
+  bbox_mm:
+    x: 60
+    y: 70
+    z: 80
+  watertight: true
+  solids: 1
+  # Volume follows from the geometry; the range catches a feature silently
+  # disappearing (a failed boolean) or doubling.
+  volume_mm3: [57000, 64000]
