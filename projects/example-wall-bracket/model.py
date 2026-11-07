@@ -22,12 +22,16 @@ from build123d import *  # noqa: F403
 WIDTH = 60.0           # common width of both plates (along X)
 WALL_PLATE_H = 80.0    # vertical plate height (along Z)
 SHELF_DEPTH = 70.0     # horizontal plate depth (along Y)
-THICKNESS = 6.0        # plate thickness
+THICKNESS = 8.0        # plate thickness
 GUSSET_T = 5.0         # thickness of the triangular rib
 
-SCREW_D = 5.5          # clearance hole for an M5 screw
-SCREW_HEAD_D = 10.0    # counterbore diameter
-SCREW_HEAD_H = 3.0     # counterbore depth
+# M5 socket head cap screw, ISO 4762: head dia 8.5 mm, head height 5.0 mm.
+M5_HEAD_D = 8.5
+M5_HEAD_H = 5.0
+SCREW_D = 5.5                    # ISO 273 medium clearance hole for M5
+SCREW_HEAD_D = M5_HEAD_D + 1.5   # counterbore dia; generous for FDM tolerance
+SCREW_HEAD_H = M5_HEAD_H + 0.2   # counterbore depth, so the head sits below
+MIN_MATERIAL_UNDER_HEAD = 2.0    # load-bearing material left beneath the head
 WALL_HOLE_SPACING = 36.0    # between the two columns of wall holes (along X)
 WALL_HOLE_Z = (22.0, 58.0)  # hole heights on the wall plate
 SHELF_HOLE_Y = 50.0    # distance from the wall to the shelf holes
@@ -35,6 +39,18 @@ SHELF_HOLE_X = 15.0    # half-spacing of the shelf holes
 
 EDGE_FILLET = 3.0      # rounding of the free outer corners
 INNER_FILLET = 4.0     # rounding of the inside corner between the plates
+
+
+# R3: screw heads must not stand proud of the front face. Checked here so a
+# parameter change cannot silently break the requirement.
+assert SCREW_HEAD_H >= M5_HEAD_H, (
+    f"counterbore {SCREW_HEAD_H} mm is shallower than the {M5_HEAD_H} mm M5 "
+    "head: the head would stand proud of the front face (requirement R3)"
+)
+assert THICKNESS - SCREW_HEAD_H >= MIN_MATERIAL_UNDER_HEAD, (
+    f"only {THICKNESS - SCREW_HEAD_H:.1f} mm of material under the screw head; "
+    f"at least {MIN_MATERIAL_UNDER_HEAD} mm is needed to carry the load"
+)
 
 
 def build():

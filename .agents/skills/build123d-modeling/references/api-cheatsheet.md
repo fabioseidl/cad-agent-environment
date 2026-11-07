@@ -58,7 +58,7 @@ fillet(objects, radius)
 chamfer(objects, length, length2=None, angle=None, reference=None)
 split(objects=None, bisect_by=Plane.YZ, keep=Keep.TOP)
 mirror(objects=None, about=Plane.XZ, mode=Mode.ADD)
-scale(objects=None, by=1.0)
+scale(objects=None, by=1, about=None, mode=Mode.REPLACE)
 add(objects, mode=Mode.ADD)          # bring an external shape into a builder
 make_face() / make_hull()            # close sketch geometry
 project(...)                         # project geometry onto a plane/face

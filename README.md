@@ -23,13 +23,27 @@ tests/          smoke tests for the toolchain and the example project
 
 ## Requirements
 
-Docker, and nothing else. The first `cad` invocation builds the image, which
-takes a few minutes and about 2 GB (OpenCASCADE is large). Afterwards every
-command runs in a throwaway container with the repository bind-mounted at
-`/work` and **no network access**.
+Docker, and nothing else. The first `cad` invocation builds the image;
+afterwards every command runs in a throwaway container with the repository
+bind-mounted at `/work` and **no network access**.
+
+Expect the image to be large: the Python dependencies alone measure 1.1 GB
+installed (OpenCASCADE ships inside the `cadquery-ocp-novtk` wheel), on top
+of a 45 MB base image. Exact image size and build time are unmeasured - see
+the note below.
+
+> **The container has not been built or run in this repository's history.**
+> Docker was unavailable in the environment where this was developed, so the
+> toolchain was exercised against an identical pip install via `CAD_LOCAL=1`:
+> every subcommand, the 6 smoke tests and the example project. The Dockerfile's
+> package names, base image tag and pinned versions are each verified to
+> exist, but the build itself is untested. The CI workflow builds it on every
+> push, so its first green run is the confirmation.
 
 To work without Docker, install `build123d`, `matplotlib` and
-`PyYAML` into a Python 3.11-3.14 environment and set `CAD_LOCAL=1`.
+`PyYAML` into a Python 3.11-3.14 environment and set `CAD_LOCAL=1`. Wheels
+exist for Linux x86-64/aarch64, macOS arm64/x86-64 and Windows amd64 on
+Python 3.11-3.14, so nothing compiles.
 
 ## Usage
 
@@ -44,11 +58,11 @@ To work without Docker, install `build123d`, `matplotlib` and
 `projects/<name>/output/`:
 
 ```
-built example-wall-bracket in 1.9s
+built example-wall-bracket in 1.7s
   wall-bracket:
     bbox      60 x 70 x 80 mm
-    volume    60329.8 mm^3   mass 74.809 g
-    com       (0, 19.7648, 24.0877) mm
+    volume    75247.2 mm^3   mass 93.307 g
+    com       (0, 20.3576, 24.6366) mm
     topology  solids=1, shells=1, faces=31, edges=75, vertices=50
     valid=True manifold=True
   ...

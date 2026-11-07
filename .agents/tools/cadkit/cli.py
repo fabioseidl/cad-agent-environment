@@ -59,6 +59,11 @@ def _measure_all(parts: dict[str, Any], spec: dict[str, Any]) -> tuple[dict[str,
     density, material = density_for(spec)
     reports: dict[str, Any] = {}
     warnings: list[str] = []
+    if material and density is None:
+        warnings.append(
+            f"no density on record for material {material!r}, so no mass was "
+            "estimated; set material.density_g_cm3 in spec.yaml"
+        )
     for name, shape in parts.items():
         report = measure(shape, density_g_cm3=density)
         if material:

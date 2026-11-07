@@ -26,11 +26,11 @@ No photos; the geometry is defined entirely by the brief.
 | `WIDTH` | 60 | example | - |
 | `WALL_PLATE_H` | 80 | example | - |
 | `SHELF_DEPTH` | 70 | example | - |
-| `THICKNESS` | 6 | design-rules.md: structural FDM wall | assumption |
+| `THICKNESS` | 8 | set by R3: M5 head height 5.0 + 0.2 clearance + 2.8 material | derived |
 | `GUSSET_T` | 5 | design-rules.md | assumption |
 | `SCREW_D` | 5.5 | M5 clearance hole, design-rules.md | standard |
-| `SCREW_HEAD_D` | 10 | M5 socket cap head 8.5 mm + counterbore allowance | standard |
-| `SCREW_HEAD_H` | 3 | counterbore depth, head sits below the surface | standard |
+| `SCREW_HEAD_D` | 10 | ISO 4762 M5 head dia 8.5 + 1.5 for FDM tolerance | standard + rule of thumb |
+| `SCREW_HEAD_H` | 5.2 | ISO 4762 M5 head height 5.0 + 0.2 so the head sits below flush | standard |
 | `WALL_HOLE_SPACING` | 36 | example | - |
 | `WALL_HOLE_Z` | 22, 58 | example | - |
 | `EDGE_FILLET` | 3 | cosmetic | assumption |
@@ -52,8 +52,15 @@ No photos; the geometry is defined entirely by the brief.
   where the screw enters with its normal pointing outwards.
 
 ## Results
-Built at 60 x 70 x 80 mm, 60 330 mm^3, approximately 74.8 g in PLA, one
-watertight solid. All six spec checks pass.
+Built at 60 x 70 x 80 mm, 75 247 mm^3, approximately 93.3 g in PLA, one
+watertight solid. All six spec checks pass. Counterbore geometry verified
+directly: openings at y = 8.0 (the front face), floors at y = 2.8, bores
+exiting at y = 0, so a 5.0 mm M5 head sits 0.2 mm below flush with 2.8 mm of
+material beneath it.
 
 ## Changelog
 - Initial example.
+- Fixed R3: the counterbore was 3 mm deep against a 5.0 mm M5 head, so the
+  head stood 2 mm proud. Plate thickness 6 -> 8 mm, counterbore 3 -> 5.2 mm.
+  The requirement is now asserted in `model.py`, and the `volume_mm3` check
+  was updated from [57000, 64000] to [71500, 79000] to match the new design.

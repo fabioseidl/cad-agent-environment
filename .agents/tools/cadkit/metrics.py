@@ -9,27 +9,30 @@ from __future__ import annotations
 
 from typing import Any
 
-# Densities in g/cm^3. Only used when the project spec names a material and
-# does not give an explicit density.
+# Densities in g/cm^3, used only when a project spec names a material without
+# giving an explicit density. Every value here was checked against published
+# material data; polymer densities still vary by brand and formulation, and
+# metal densities vary by alloy and temper, so set `density_g_cm3` explicitly
+# in spec.yaml whenever the mass estimate matters.
+#
+# Materials deliberately absent (resin, acrylic, timber, filled filaments)
+# vary too much to carry a single defensible number: give the density.
 MATERIAL_DENSITY_G_CM3: dict[str, float] = {
+    # Polymers, typical unfilled FDM filament
     "pla": 1.24,
     "petg": 1.27,
     "abs": 1.04,
-    "asa": 1.07,
-    "tpu": 1.21,
-    "nylon": 1.14,
-    "resin": 1.15,
-    "aluminium": 2.70,
+    "asa": 1.07,      # reported 1.05-1.09
+    "tpu": 1.21,      # reported 1.14-1.24, varies strongly with shore hardness
+    "nylon": 1.14,    # unfilled PA; filled grades are much denser
+    # Metals
+    "aluminium": 2.70,        # 6061-T6; other alloys up to ~2.81
     "aluminum": 2.70,
-    "steel": 7.85,
-    "stainless-steel": 7.90,
+    "steel": 7.85,            # mild steel
+    "stainless-steel": 8.00,  # 304; grades range ~7.7-8.0
     "brass": 8.50,
     "copper": 8.96,
-    "titanium": 4.51,
-    "abs-plate": 1.04,
-    "acrylic": 1.18,
-    "plywood": 0.60,
-    "pine": 0.50,
+    "titanium": 4.51,         # commercially pure
 }
 
 

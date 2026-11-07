@@ -42,9 +42,9 @@ package, usable by any agent or human that can run a command.
 
 Add `--json` to any reporting command for machine-readable output.
 
-The first invocation builds the Docker image (a few minutes; OpenCASCADE is
-large). Afterwards each command starts a throwaway container with the repo
-bind-mounted at `/work` and no network access.
+The first invocation builds the Docker image. Afterwards each command starts
+a throwaway container with the repo bind-mounted at `/work` and no network
+access. The image build is untested - see the note in the root README.
 
 Environment variables: `CAD_LOCAL=1` to use a host Python that already has
 build123d instead of Docker, `CAD_PYTHON` to pick that interpreter,

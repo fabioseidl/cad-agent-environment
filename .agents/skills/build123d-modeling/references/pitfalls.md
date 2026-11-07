@@ -112,7 +112,8 @@ normalized tuple or a hex integer. `cad views` already does this.
 
 `Text()` resolves fonts through fontconfig, whose default is `Arial`. The
 container only installs `fonts-dejavu-core`, and fontconfig **substitutes a
-different font silently** rather than failing - so text built with the default
+different font silently** rather than failing (observed outside the
+container, on a host that also lacks Arial) - so text built with the default
 has different glyph widths than intended, and engraved text can come out a
 different size. Pass `font="DejaVu Sans"` (or an explicit `font_path=`) and
 measure the resulting bounding box.
