@@ -55,6 +55,15 @@ built example-wall-bracket in 1.7s
   checks: PASS (6/6)
 ```
 
+## Example project
+
+The repo includes `projects/example-wall-bracket/`, a parametric shelf bracket with counterbored M5 fixings and gusset plates. It demonstrates the full workflow: brief, dimensions, spec.yaml constraints, parametric model in build123d, export to STEP/STL/3MF, rendered preview images, and automated validation.
+
+Rendered views of the example wall bracket:
+
+![Example wall bracket — front](docs/example-wall-bracket.png)
+
+
 ## Project layout
 
 ```text
@@ -65,12 +74,6 @@ projects/<name>/
   reference/      # photos or screenshots of the real object (optional)
   output/         # generated STEP, STL, 3MF, rendered views (not committed to VCS)
 ```
-
-## Example project
-
-The repo includes `projects/example-wall-bracket/`, a parametric shelf bracket with counterbored M5 fixings and gusset plates. Rendered preview: `docs/example-wall-bracket.png`.
-
-Run `make example` or clone the repository to see it in action.
 
 ## Tests
 
