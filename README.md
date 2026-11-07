@@ -1,64 +1,50 @@
 # CAD agent environment
 
-A workspace in which an AI agent produces real CAD models from a description,
-measurements and photos of an object. Geometry is written as Python with
-[build123d](https://github.com/gumyr/build123d) on OpenCASCADE, executed in a
-Docker container, and exported as STEP, STL and 3MF.
+A repository for building parametric 3D models with build123d (Python + OpenCASCADE). It provides a reproducible toolchain that scaffolds projects, exports to STEP/STL/3MF, measures geometry against acceptance criteria, and renders preview images.
 
-The point of the repository is repeatability: one command builds, measures,
-renders and verifies a model, so an agent spends its effort on the geometry
-rather than on re-inventing export and measurement scripts each session.
+## What it does
 
-## Layout
+- **Scaffolding**: `cad new <name>` creates a project directory with a brief template, dimension table, spec.yaml (machine-checkable constraints), model.py stub, and output folder.
+- **Building**: `cad build` compiles the model, exports STEP/STL/3MF, computes bbox/volume/mass/com, runs topology validation, renders views, and writes results to `projects/<name>/output/`.
+- **Validation**: `spec.yaml` defines measurable properties (tolerances, bounding box, volume range, watertightness, solid count). `cad check` runs these checks and exits non-zero on failure.
+- **Inspection**: `cad list`, `cad measure`, `cad preview`, `cad views` provide quick access to project metadata without rebuilding.
 
-```
-.agents/        skills and tools the agent uses (tool-neutral)
-  skills/       build123d-modeling, cad-project-workflow, dimensions-from-media
-  tools/cad     the single entry point for every CAD operation
-docker/         container definition: Python 3.12 + build123d 0.13 + OpenCASCADE
-projects/       one directory per object: brief, spec, model, reference, output
-tests/          smoke tests for the toolchain and the example project
-.claude/skills  symlink to .agents/skills so Claude Code loads them
-```
+## Why use this repository
 
-## Requirements
+| Problem | Solution |
+|----------|-----------|
+| CAD models are hard to share (scripts get lost, tolerances drift between sessions) | All constraints live in `spec.yaml`; validation is automated and repeatable. |
+| Parametric modeling requires writing boilerplate for export/format/validation every time | One scaffolded project file handles the full pipeline. |
+| Desktop CAD tools are non-scriptable or awkward to version-control | Build123d + OpenCASCADE runs as pure Python; changes are diffs in text files. |
+| "It works on my machine" is common in CAD workflows | Docker image pins build123d, OpenCASCADE, and all dependencies; same environment everywhere. |
 
-Docker, and nothing else. The first `cad` invocation builds the image;
-afterwards every command runs in a throwaway container with the repository
-bind-mounted at `/work` and **no network access**.
+## How it works (briefly)
 
-The image measures **2.00 GB** and took **2m28s** to build on one x86-64
-machine from a cold cache (OpenCASCADE ships inside the `cadquery-ocp-novtk`
-wheel, which is most of it). Both figures will vary with network speed and
-hardware.
+The `cad` CLI script invokes a Docker container that contains Python 3.10+, build123d 0.13+, numpy, meshio, matplotlib, PyYAML, and the full OpenCASCADE runtime. The repository is bind-mounted at `/work`, so generated files appear directly on the host under `projects/<name>/output/`.
 
-The image has been built and exercised: `doctor`, `new`, `build`, `views`,
-`list`, `run` and the 6 smoke tests all pass inside the container, and the
-example project builds there to the same geometry as a host install
-(75 247.2 mm^3 either way). One caveat: the verification build ran in a
-sandbox behind a TLS-terminating proxy, so a CA certificate and three
-matching environment variables had to be added for `pip` to reach PyPI.
-Everything else - base image, apt packages, pinned versions, the in-build
-smoke test - is exactly what this Dockerfile specifies.
+If Docker isn't available, set `CAD_LOCAL=1` to run against a local Python environment that has build123d installed (wheels exist for Linux x86_64/aarch64, macOS arm64/x86_64, Windows amd64 on Python 3.11–3.14).
 
-To work without Docker, install `build123d`, `matplotlib` and
-`PyYAML` into a Python 3.11-3.14 environment and set `CAD_LOCAL=1`. Wheels
-exist for Linux x86-64/aarch64, macOS arm64/x86-64 and Windows amd64 on
-Python 3.11-3.14, so nothing compiles.
-
-## Usage
+## Quick start
 
 ```bash
-.agents/tools/cad doctor                 # check the toolchain
-.agents/tools/cad new phone-stand        # scaffold projects/phone-stand/
-#   fill in README.md (brief + dimensions), spec.yaml (checks), model.py
-.agents/tools/cad build phone-stand      # export + measure + render + check
+# verify the toolchain works
+.agents/tools/cad doctor
+
+# scaffold a new project (creates projects/<name>/ with README.md, spec.yaml, model.py)
+.agents/tools/cad new wall-bracket
+
+# edit:
+#   - projects/wall-bracket/README.md  (brief + dimensions)
+#   - projects/wall-bracket/spec.yaml  (acceptance criteria)
+#   - projects/wall-bracket/model.py   (parametric geometry)
+
+# build and validate
+.agents/tools/cad build wall-bracket
 ```
 
-`cad build` prints a summary and writes everything to
-`projects/<name>/output/`:
+`cad build` output example:
 
-```
+```text
 built example-wall-bracket in 1.7s
   wall-bracket:
     bbox      60 x 70 x 80 mm
@@ -66,48 +52,32 @@ built example-wall-bracket in 1.7s
     com       (0, 20.3576, 24.6366) mm
     topology  solids=1, shells=1, faces=31, edges=75, vertices=50
     valid=True manifold=True
-  ...
   checks: PASS (6/6)
 ```
 
-Other commands: `list`, `measure`, `preview`, `views` (2D SVG/DXF with hidden
-lines), `check`, `run`, `formats`. Add `--json` for machine-readable output.
-Full reference: [`.agents/README.md`](.agents/README.md).
+## Project layout
 
-## How a project is organised
-
-Each object gets a directory under `projects/` holding the brief and
-dimension table (`README.md`), the machine-checkable acceptance criteria
-(`spec.yaml`), the parametric model (`model.py`) and the user's photos
-(`reference/`). Generated files land in `output/` and are not committed.
-
-`spec.yaml` is what makes revision cheap - the requirements are checkable:
-
-```yaml
-checks:
-  tolerance_mm: 0.1
-  bbox_mm: {x: 60, y: 70, z: 80}
-  volume_mm3: [57000, 64000]
-  watertight: true
-  solids: 1
+```text
+projects/<name>/
+  README.md      # brief and dimension table
+  spec.yaml       # machine-checkable acceptance criteria
+  model.py        # parametric build123d model
+  reference/      # photos or screenshots of the real object (optional)
+  output/         # generated STEP, STL, 3MF, rendered views (not committed to VCS)
 ```
 
-`cad check` exits non-zero when the model stops matching the brief.
+## Example project
 
-## Worked example
+The repo includes `projects/example-wall-bracket/`, a parametric shelf bracket with counterbored M5 fixings and gusset plates. Rendered preview: `docs/example-wall-bracket.png`.
 
-```bash
-make example
-```
-
-builds [`projects/example-wall-bracket/`](projects/example-wall-bracket/), a
-parametric shelf bracket with counterbored M5 fixings and a gusset, and
-renders it to `output/preview/example-wall-bracket_views.png`:
-
-![Example wall bracket, four rendered views](docs/example-wall-bracket.png)
+Run `make example` or clone the repository to see it in action.
 
 ## Tests
 
 ```bash
-make test
+make test   # smoke tests for the toolchain and all example projects
 ```
+
+---
+
+**Next step:** run `.agents/tools/cad doctor` to confirm your environment is ready, then create a new project with `.agents/tools/cad new <name>`.
