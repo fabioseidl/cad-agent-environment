@@ -1,8 +1,17 @@
 # `.agents/` - the agent-facing layer
 
-Everything an agent needs to do CAD work in this repository. Tool-neutral:
-Claude Code picks it up through the `.claude/skills` symlink, other tools can
-read `.agents/skills/` directly.
+Everything an agent needs to do CAD work in this repository.
+
+`.agents/skills/` is an emerging cross-client convention for sharing skills
+between coding agents, not a ratified standard, and discovery still differs
+per tool: Claude Code reads `.claude/skills/` (hence the symlink at the
+repository root), OpenAI Codex reads `.agents/skills/`, GitHub Copilot reads
+`.github/skills/`. Check your own tool's documentation; where it does not
+discover this directory, the SKILL.md files are still plain Markdown that can
+be read by path.
+
+The `cad` CLI below has no such caveat - it is a shell script and a Python
+package, usable by any agent or human that can run a command.
 
 ```
 .agents/
