@@ -44,7 +44,7 @@ Add `--json` to any reporting command for machine-readable output.
 
 The first invocation builds the Docker image. Afterwards each command starts
 a throwaway container with the repo bind-mounted at `/work` and no network
-access. The image build is untested - see the note in the root README.
+access. The image is about 2 GB and takes a couple of minutes to build.
 
 Environment variables: `CAD_LOCAL=1` to use a host Python that already has
 build123d instead of Docker, `CAD_PYTHON` to pick that interpreter,

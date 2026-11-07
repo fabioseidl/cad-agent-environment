@@ -27,18 +27,19 @@ Docker, and nothing else. The first `cad` invocation builds the image;
 afterwards every command runs in a throwaway container with the repository
 bind-mounted at `/work` and **no network access**.
 
-Expect the image to be large: the Python dependencies alone measure 1.1 GB
-installed (OpenCASCADE ships inside the `cadquery-ocp-novtk` wheel), on top
-of a 45 MB base image. Exact image size and build time are unmeasured - see
-the note below.
+The image measures **2.00 GB** and took **2m28s** to build on one x86-64
+machine from a cold cache (OpenCASCADE ships inside the `cadquery-ocp-novtk`
+wheel, which is most of it). Both figures will vary with network speed and
+hardware.
 
-> **The container has not been built or run in this repository's history.**
-> Docker was unavailable in the environment where this was developed, so the
-> toolchain was exercised against an identical pip install via `CAD_LOCAL=1`:
-> every subcommand, the 6 smoke tests and the example project. The Dockerfile's
-> package names, base image tag and pinned versions are each verified to
-> exist, but the build itself is untested. The CI workflow builds it on every
-> push, so its first green run is the confirmation.
+The image has been built and exercised: `doctor`, `new`, `build`, `views`,
+`list`, `run` and the 6 smoke tests all pass inside the container, and the
+example project builds there to the same geometry as a host install
+(75 247.2 mm^3 either way). One caveat: the verification build ran in a
+sandbox behind a TLS-terminating proxy, so a CA certificate and three
+matching environment variables had to be added for `pip` to reach PyPI.
+Everything else - base image, apt packages, pinned versions, the in-build
+smoke test - is exactly what this Dockerfile specifies.
 
 To work without Docker, install `build123d`, `matplotlib` and
 `PyYAML` into a Python 3.11-3.14 environment and set `CAD_LOCAL=1`. Wheels
